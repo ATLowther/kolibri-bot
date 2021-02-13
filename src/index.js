@@ -13,11 +13,15 @@ axiosRetry(axios, {
   retryDelay: axiosRetry.exponentialDelay,
 });
 
-const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET || throw Error("Must set DISCORD_WEBHOOK_TESTNET")
-const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET || throw Error("Must set DISCORD_WEBHOOK_MAINNET")
+const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET
+const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET
+
+if (DISCORD_WEBHOOK_TESTNET === undefined || DISCORD_WEBHOOK_MAINNET === undefined){
+  throw new Error("Must set DISCORD_WEBHOOK_TESTNET and DISCORD_WEBHOOK_MAINNET!")
+}
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: 'debug',
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -56,30 +60,29 @@ const OPERATION_HANDLER_MAP = Object.freeze({
 
 logger.info("Starting!")
 
-// Watch all mainnet ovens
-stableCoinClientMainnet.getAllOvens()
-    .then(async (ovens) => {
+// Kick off mainnet factory watcher first, then watch all mainnet ovens
+watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 30_000, null)
+    .then(async () => {
+      const ovens = await stableCoinClientMainnet.getAllOvens()
       for (const {ovenAddress} of ovens) {
         // Sleep for 1s to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, 30_000, null)
+        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, 60_000, null)
       }
     })
 
-// Watch all testnet ovens
-stableCoinClientTestnet.getAllOvens()
-    .then(async (ovens) => {
+// Kick off testnet factory watcher first, then watch all testnet ovens
+watchContract(Network.Delphi, CONTRACTS.DELPHI.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 30_000, null)
+    .then(async () => {
+      const ovens = await stableCoinClientTestnet.getAllOvens()
+
       for (const {ovenAddress} of ovens) {
         // Sleep for 1s to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 1000));
-
         await watchContract(Network.Delphi, ovenAddress, CONTRACT_TYPES.Oven, 60_000, null)
       }
     })
-
-// Watch oven factory
-watchContract(Network.Delphi, CONTRACTS.DELPHI.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 10_000, null)
 
 async function watchContract(network, contractAddress, type, timeout, state) {
   logger.info("Fetching contract data", {network, contractAddress})
