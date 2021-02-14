@@ -158,12 +158,12 @@ function ovenFactoryOperationMessage(operation){
 function ovenOperationMessage(operation){
   if (operation.entrypoint === 'default') {
     return `💰 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Deposited ${formatXTZ(operation.amount)} XTZ into [their oven](${makeOpLink(operation.network, operation.destination)})`
+  } else if (operation.entrypoint === 'withdraw'){
+    return `🏧 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Withdrew ${formatXTZ(operation.parameters.value)} XTZ from [their oven](${makeOpLink(operation.network, operation.destination)})`
   } else if (operation.entrypoint === 'borrow'){
       return `💸 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Borrowed ${formatkUSD(operation.parameters.value)} kUSD from [their oven](${makeOpLink(operation.network, operation.destination)})`
   } else if (operation.entrypoint === 'repay'){
     return `💵 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Repaid ${formatkUSD(operation.parameters.value)} kUSD to [their oven](${makeOpLink(operation.network, operation.destination)})`
-  } else if (operation.entrypoint === 'withdraw'){
-    return `🏧 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Withdrew ${formatXTZ(operation.parameters.value)} kUSD to [their oven](${makeOpLink(operation.network, operation.destination)})`
   } else if (operation.entrypoint === 'liquidate'){
     return `🌊 [${operation.source}](${makeFromLink(operation.network, operation.source)}) Liquidated oven [${operation.destination}](${makeOpLink(operation.network, operation.destination)})`
   } else if (operation.entrypoint === 'setDelegate'){
