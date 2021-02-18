@@ -61,26 +61,26 @@ const OPERATION_HANDLER_MAP = Object.freeze({
 logger.info("Starting!")
 
 // Kick off mainnet factory watcher first, then watch all mainnet ovens
-watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 30_000, null)
+watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 120 * 1000, null)
     .then(async () => {
       const ovens = await stableCoinClientMainnet.getAllOvens()
       for (const {ovenAddress} of ovens) {
         // Sleep for 1s to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, 60_000, null)
+        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, 120 * 1000, null)
       }
     })
 
 // Kick off testnet factory watcher first, then watch all testnet ovens
-watchContract(Network.Delphi, CONTRACTS.DELPHI.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 30_000, null)
+watchContract(Network.Delphi, CONTRACTS.DELPHI.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, 120 * 1000, null)
     .then(async () => {
       const ovens = await stableCoinClientTestnet.getAllOvens()
 
       for (const {ovenAddress} of ovens) {
         // Sleep for 1s to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await watchContract(Network.Delphi, ovenAddress, CONTRACT_TYPES.Oven, 60_000, null)
+        await watchContract(Network.Delphi, ovenAddress, CONTRACT_TYPES.Oven, 120 * 1000, null)
       }
     })
 
@@ -122,7 +122,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
     state.latestOpTimestamp = new Date(latestOp.timestamp).getTime()
   } else {
-    logger.info("No new operations!", network, contractAddress)
+    logger.debug("No new operations!", network, contractAddress)
   }
 
   setTimeout(watchContract.bind(null, network, contractAddress, type, timeout, state), timeout)
