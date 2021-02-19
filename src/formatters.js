@@ -3,27 +3,27 @@ const BigNumber = require('bignumber.js');
 module.exports = {
   ovenFactoryOperationMessage(operation){
     if (operation.entrypoint === 'makeOven'){
-      return `👨‍🍳 [New oven created](${this.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${this.makeFromLink(operation.network, operation.source)})`
+      return `👨‍🍳 [New oven created](${module.exports.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)})`
     } else {
-      return `📝 [${operation.entrypoint} called on OvenFactory contract](${this.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${this.makeFromLink(operation.network, operation.source)})`
+      return `📝 [${operation.entrypoint} called on OvenFactory contract](${module.exports.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)})`
     }
   },
 
   ovenOperationMessage(operation){
     if (operation.entrypoint === 'default') {
-      return `💰 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Deposited ${this.formatXTZ(operation.amount)} XTZ into [their oven](${this.makeOpLink(operation.network, operation.destination)})`
+      return `💰 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Deposited ${module.exports.formatXTZ(operation.amount)} XTZ into [their oven](${module.exports.makeOpLink(operation.network, operation.destination)})`
     } else if (operation.entrypoint === 'withdraw'){
-      return `🏧 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Withdrew ${this.formatXTZ(operation.parameters.value)} XTZ from [their oven](${this.makeOpLink(operation.network, operation.destination)})`
+      return `🏧 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Withdrew ${module.exports.formatXTZ(operation.parameters.value)} XTZ from [their oven](${module.exports.makeOpLink(operation.network, operation.destination)})`
     } else if (operation.entrypoint === 'borrow'){
-      return `💸 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Borrowed ${this.formatkUSD(operation.parameters.value)} kUSD from [their oven](${this.makeOpLink(operation.network, operation.destination)})`
+      return `💸 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Borrowed ${module.exports.formatkUSD(operation.parameters.value)} kUSD from [their oven](${module.exports.makeOpLink(operation.network, operation.destination)})`
     } else if (operation.entrypoint === 'repay'){
-      return `💵 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Repaid ${this.formatkUSD(operation.parameters.value)} kUSD to [their oven](${this.makeOpLink(operation.network, operation.destination)})`
+      return `💵 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Repaid ${module.exports.formatkUSD(operation.parameters.value)} kUSD to [their oven](${module.exports.makeOpLink(operation.network, operation.destination)})`
     } else if (operation.entrypoint === 'liquidate'){
-      return `🌊 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Liquidated oven [${operation.destination}](${this.makeOpLink(operation.network, operation.destination)})`
+      return `🌊 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Liquidated oven [${operation.destination}](${module.exports.makeOpLink(operation.network, operation.destination)})`
     } else if (operation.entrypoint === 'setDelegate'){
-      return `🎖 [${operation.source}](${this.makeFromLink(operation.network, operation.source)}) Set oven delegate to [${operation.parameters.value}](${this.makeBakerLink(operation.network, operation.parameters.value)})`
+      return `🎖 [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)}) Set oven delegate to [${operation.parameters.value}](${module.exports.makeBakerLink(operation.network, operation.parameters.value)})`
     } else {
-      return `📝 [${operation.entrypoint} called on Oven contract](${this.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${this.makeFromLink(operation.network, operation.source)})`
+      return `📝 [${operation.entrypoint} called on Oven contract](${module.exports.makeOpLink(operation.network, operation.hash)}) by [${operation.source}](${module.exports.makeFromLink(operation.network, operation.source)})`
     }
   },
 
