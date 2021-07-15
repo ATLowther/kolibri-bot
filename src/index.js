@@ -106,7 +106,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
       state = {}
     } else {
       // Do notification things here
-      logger.info("New operations found!", {network, contractAddress, operations})
+      logger.info("New operations found!", {network, contractAddress, operations: operations.length})
 
       for (const operation of operations) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
@@ -126,7 +126,8 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 }
 
 async function processNewOperation(operation, contractType){
-  logger.info("New operation found!", {operation, contractType})
+  logger.info("New operation found!")
+  logger.info(OPERATION_HANDLER_MAP[contractType](operation))
   // if (operation.network === 'mainnet'){
   //   await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
   //     content: OPERATION_HANDLER_MAP[contractType](operation)
