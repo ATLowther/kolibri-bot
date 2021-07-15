@@ -95,7 +95,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
       {params: {status: 'applied', from: state.latestOpTimestamp + 1}} // +1 as the check server-side is >= so we include the last tx without it
 
   const response = await betterCallDevAxios.get(
-      `https://better-call.dev/v1/contract/${network}/${contractAddress}/operations`,
+      `https://api.better-call.dev/v1/contract/${network}/${contractAddress}/operations`,
       params
   )
 
@@ -146,7 +146,7 @@ async function processNewOperation(operation, contractType){
   // If we have a `makeOven` call, we need to add a watcher for the new oven
   if (contractType === CONTRACT_TYPES.OvenFactory && operation.entrypoint === 'makeOven'){
     logger.info("makeOven called, adding it to the pool!")
-    const result = await betterCallDevAxios.get('https://better-call.dev/v1/opg/' + operation.hash)
+    const result = await betterCallDevAxios.get('https://api.better-call.dev/v1/opg/' + operation.hash)
 
     let newlyCreatedContract = result.data.find(o => o.kind === 'origination').destination
     logger.info("Found newly created contract!", {newlyCreatedContract, network: operation.network})
