@@ -64,16 +64,16 @@ const OPERATION_HANDLER_MAP = Object.freeze({
 logger.info("Starting Kolibri-bot!")
 
 // Kick off mainnet factory watcher first, then watch all mainnet ovens
-// watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
-//     .then(async () => {
-//       const ovens = await stableCoinClientMainnet.getAllOvens()
-//       for (const {ovenAddress} of ovens) {
-//         // Sleep for 250ms to prevent thundering herd issues
-//         await new Promise(resolve => setTimeout(resolve, 250));
+watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
+    .then(async () => {
+      const ovens = await stableCoinClientMainnet.getAllOvens()
+      for (const {ovenAddress} of ovens) {
+        // Sleep for 250ms to prevent thundering herd issues
+        await new Promise(resolve => setTimeout(resolve, 250));
 
-//         await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
-//       }
-//     })
+        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
+      }
+    })
 
 // Kick off testnet factory watcher first, then watch all testnet ovens
 watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
