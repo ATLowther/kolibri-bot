@@ -76,7 +76,7 @@ watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenF
     })
 
 // Kick off testnet factory watcher first, then watch all testnet ovens
-watchContract(Network.Florence, CONTRACTS.Florence.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
+watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
     .then(async () => {
       const ovens = await stableCoinClientTestnet.getAllOvens()
 
