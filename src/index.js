@@ -12,7 +12,7 @@ Sentry.init({
 
 require('dotenv').config()
 
-const WATCH_TIMEOUT = 10 * 60 * 1000 // Check contracts every 10 mins
+const WATCH_TIMEOUT = 2 * 60 * 1000 // Check contracts every 10 mins
 const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET
 const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET
 
@@ -64,16 +64,16 @@ const OPERATION_HANDLER_MAP = Object.freeze({
 logger.info("Starting Kolibri-bot!")
 
 // Kick off mainnet factory watcher first, then watch all mainnet ovens
-watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
-    .then(async () => {
-      const ovens = await stableCoinClientMainnet.getAllOvens()
-      for (const {ovenAddress} of ovens) {
-        // Sleep for 250ms to prevent thundering herd issues
-        await new Promise(resolve => setTimeout(resolve, 250));
+// watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
+//     .then(async () => {
+//       const ovens = await stableCoinClientMainnet.getAllOvens()
+//       for (const {ovenAddress} of ovens) {
+//         // Sleep for 250ms to prevent thundering herd issues
+//         await new Promise(resolve => setTimeout(resolve, 250));
 
-        await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
-      }
-    })
+//         await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
+//       }
+//     })
 
 // Kick off testnet factory watcher first, then watch all testnet ovens
 watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
@@ -106,9 +106,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
     // If this is our first run, just update with the operations and move on
     if (state === null){
-      state = {
-        seenOperations: operations,
-      }
+      state = {}
     } else {
       // Do notification things here
       logger.info("New operations found!", network, contractAddress, operations)
@@ -119,11 +117,10 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
         await processNewOperation(operation, type)
       }
-
-      state.seenOperations.concat(operations)
     }
 
     state.latestOpTimestamp = new Date(latestOp.timestamp).getTime()
+    console.log("new timestamp", state.latestOpTimestamp)
   } else {
     logger.debug("No new operations!", network, contractAddress)
   }
