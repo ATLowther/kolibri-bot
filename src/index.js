@@ -90,7 +90,7 @@ watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.Oven
 async function watchContract(network, contractAddress, type, timeout, state) {
   const params = state === null ?
       "status=applied" :
-      `status=applied&from=${state.latestOpTimestamp + 1}` // +1 as the check server-side is >= so we include the last tx without it
+      `status=applied&from=${state.latestOpTimestamp + 1000}` // +1s as the check server-side is >= so we include the last tx without it
 
   logger.info("Fetching contract data", {network, contractAddress, state, params})
 
