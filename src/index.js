@@ -117,7 +117,6 @@ async function watchContract(network, contractAddress, type, timeout, state) {
     }
 
     state.latestOpTimestamp = new Date(latestOp.timestamp).getTime()
-    console.log("new timestamp", state.latestOpTimestamp)
   } else {
     logger.debug("No new operations!", network, contractAddress)
   }
