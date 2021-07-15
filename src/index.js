@@ -127,15 +127,15 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 async function processNewOperation(operation, contractType){
   logger.info("New operation found!")
   logger.info(OPERATION_HANDLER_MAP[contractType](operation))
-  // if (operation.network === 'mainnet'){
-  //   await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
-  //     content: OPERATION_HANDLER_MAP[contractType](operation)
-  //   })
-  // } else {
-  //   await discordAxios.post(DISCORD_WEBHOOK_TESTNET, {
-  //     content: OPERATION_HANDLER_MAP[contractType](operation)
-  //   })
-  // }
+  if (operation.network === 'mainnet'){
+    await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
+      content: OPERATION_HANDLER_MAP[contractType](operation)
+    })
+  } else {
+    await discordAxios.post(DISCORD_WEBHOOK_TESTNET, {
+      content: OPERATION_HANDLER_MAP[contractType](operation)
+    })
+  }
 
   // If we have a `makeOven` call, we need to add a watcher for the new oven
   if (contractType === CONTRACT_TYPES.OvenFactory && operation.entrypoint === 'makeOven'){
