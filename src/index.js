@@ -38,9 +38,9 @@ const logger = winston.createLogger({
 const stableCoinClientTestnet = new StableCoinClient(
     'https://rpctest.tzbeta.net',
     Network.Florence,
-    CONTRACTS.Florence.OVEN_REGISTRY,
-    CONTRACTS.Florence.MINTER,
-    CONTRACTS.Florence.OVEN_FACTORY,
+    CONTRACTS.TEST.OVEN_REGISTRY,
+    CONTRACTS.TEST.MINTER,
+    CONTRACTS.TEST.OVEN_FACTORY,
 )
 
 const stableCoinClientMainnet = new StableCoinClient(
