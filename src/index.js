@@ -81,18 +81,18 @@ watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.Oven
       const ovens = await stableCoinClientTestnet.getAllOvens()
 
       for (const {ovenAddress} of ovens) {
-        // Sleep for 1s to prevent thundering herd issues
+        // Sleep for 250ms to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 250));
         await watchContract(Network.Florence, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
       }
     })
 
 async function watchContract(network, contractAddress, type, timeout, state) {
-  logger.info("Fetching contract data", {network, contractAddress})
-
   const params = state === null ?
       {params: {status: 'applied'}} :
       {params: {status: 'applied', from: state.latestOpTimestamp + 1}} // +1 as the check server-side is >= so we include the last tx without it
+
+  logger.info("Fetching contract data", {network, contractAddress, state, params})
 
   const response = await betterCallDevAxios.get(
       `https://api.better-call.dev/v1/contract/${network}/${contractAddress}/operations`,
