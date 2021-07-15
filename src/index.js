@@ -38,9 +38,9 @@ const logger = winston.createLogger({
 const stableCoinClientTestnet = new StableCoinClient(
     'https://rpctest.tzbeta.net',
     Network.Florence,
-    CONTRACTS.DELPHI.OVEN_REGISTRY,
-    CONTRACTS.DELPHI.MINTER,
-    CONTRACTS.DELPHI.OVEN_FACTORY,
+    CONTRACTS.Florence.OVEN_REGISTRY,
+    CONTRACTS.Florence.MINTER,
+    CONTRACTS.Florence.OVEN_FACTORY,
 )
 
 const stableCoinClientMainnet = new StableCoinClient(
@@ -76,14 +76,14 @@ watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenF
     })
 
 // Kick off testnet factory watcher first, then watch all testnet ovens
-watchContract(Network.Delphi, CONTRACTS.DELPHI.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
+watchContract(Network.Florence, CONTRACTS.Florence.OVEN_FACTORY, CONTRACT_TYPES.OvenFactory, WATCH_TIMEOUT, null)
     .then(async () => {
       const ovens = await stableCoinClientTestnet.getAllOvens()
 
       for (const {ovenAddress} of ovens) {
         // Sleep for 1s to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 250));
-        await watchContract(Network.Delphi, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
+        await watchContract(Network.Florence, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
       }
     })
 
