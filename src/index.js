@@ -106,7 +106,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
       state = {}
     } else {
       // Do notification things here
-      logger.info("New operations found!", network, contractAddress, operations)
+      logger.info("New operations found!", {network, contractAddress, operations})
 
       for (const operation of operations) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
