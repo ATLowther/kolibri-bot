@@ -96,7 +96,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
   const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/operations?${params}`)
 
-  const operations = _(response.data.operations).filter(op => op.internal === false).value()
+  const operations = _(response.data.operations).filter(op => op.internal === false).value().reverse()
 
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
