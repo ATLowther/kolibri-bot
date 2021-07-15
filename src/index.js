@@ -37,7 +37,7 @@ const logger = winston.createLogger({
 
 const stableCoinClientTestnet = new StableCoinClient(
     'https://rpctest.tzbeta.net',
-    Network.Delphi,
+    Network.Florence,
     CONTRACTS.DELPHI.OVEN_REGISTRY,
     CONTRACTS.DELPHI.MINTER,
     CONTRACTS.DELPHI.OVEN_FACTORY,
