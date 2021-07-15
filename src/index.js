@@ -12,7 +12,7 @@ Sentry.init({
 
 require('dotenv').config()
 
-const WATCH_TIMEOUT = 10 * 60 * 1000 // Check contracts every 10 mins
+const WATCH_TIMEOUT = 15 * 60 * 1000 // Check contracts every 10 mins
 const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET
 const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET
 
@@ -68,7 +68,7 @@ watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenF
     .then(async () => {
       const ovens = await stableCoinClientMainnet.getAllOvens()
       for (const {ovenAddress} of ovens) {
-        // Sleep for 1s to prevent thundering herd issues
+        // Sleep for 250ms to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 250));
 
         await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
@@ -81,37 +81,32 @@ watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.Oven
       const ovens = await stableCoinClientTestnet.getAllOvens()
 
       for (const {ovenAddress} of ovens) {
-        // Sleep for 1s to prevent thundering herd issues
+        // Sleep for 250ms to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 250));
         await watchContract(Network.Florence, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
       }
     })
 
 async function watchContract(network, contractAddress, type, timeout, state) {
-  logger.info("Fetching contract data", {network, contractAddress})
-
   const params = state === null ?
-      {params: {status: 'applied'}} :
-      {params: {status: 'applied', from: state.latestOpTimestamp + 1}} // +1 as the check server-side is >= so we include the last tx without it
+      "status=applied" :
+      `status=applied&from=${state.latestOpTimestamp + 1000}` // +1s as the check server-side is >= so we include the last tx without it
 
-  const response = await betterCallDevAxios.get(
-      `https://api.better-call.dev/v1/contract/${network}/${contractAddress}/operations`,
-      params
-  )
+  logger.info("Fetching contract data", {network, contractAddress, state, params})
 
-  const operations = _(response.data.operations).filter(op => op.internal === false).value()
+  const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/operations?${params}`)
+
+  const operations = _(response.data.operations).filter(op => op.internal === false).value().reverse()
 
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
 
     // If this is our first run, just update with the operations and move on
     if (state === null){
-      state = {
-        seenOperations: operations,
-      }
+      state = {}
     } else {
       // Do notification things here
-      logger.info("New operations found!", network, contractAddress, operations)
+      logger.info("New operations found!", {network, contractAddress, operations: operations.length})
 
       for (const operation of operations) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
@@ -119,8 +114,6 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
         await processNewOperation(operation, type)
       }
-
-      state.seenOperations.concat(operations)
     }
 
     state.latestOpTimestamp = new Date(latestOp.timestamp).getTime()
@@ -132,7 +125,8 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 }
 
 async function processNewOperation(operation, contractType){
-  logger.info("New operation found!", {operation, contractType})
+  logger.info("New operation found!")
+  logger.info(OPERATION_HANDLER_MAP[contractType](operation))
   if (operation.network === 'mainnet'){
     await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
       content: OPERATION_HANDLER_MAP[contractType](operation)

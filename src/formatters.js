@@ -44,14 +44,14 @@ module.exports = {
     if (network === 'mainnet'){
       return `<https://tzkt.io/${address}>`
     } else {
-      return `<https://delphinet.tzkt.io/${address}>`
+      return `<https://florencenet.tzkt.io/${address}>`
     }
   },
   makeOpLink(network, opHash){
     if (network === 'mainnet'){
       return `<https://tzkt.io/${opHash}>`
     } else {
-      return `<https://delphinet.tzkt.io/${opHash}>`
+      return `<https://florencenet.tzkt.io/${opHash}>`
     }
   },
 }
