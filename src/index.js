@@ -68,7 +68,7 @@ watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenF
     .then(async () => {
       const ovens = await stableCoinClientMainnet.getAllOvens()
       for (const {ovenAddress} of ovens) {
-        // Sleep for 1s to prevent thundering herd issues
+        // Sleep for 250ms to prevent thundering herd issues
         await new Promise(resolve => setTimeout(resolve, 250));
 
         await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
@@ -133,15 +133,15 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
 async function processNewOperation(operation, contractType){
   logger.info("New operation found!", {operation, contractType})
-  if (operation.network === 'mainnet'){
-    await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
-      content: OPERATION_HANDLER_MAP[contractType](operation)
-    })
-  } else {
-    await discordAxios.post(DISCORD_WEBHOOK_TESTNET, {
-      content: OPERATION_HANDLER_MAP[contractType](operation)
-    })
-  }
+  // if (operation.network === 'mainnet'){
+  //   await discordAxios.post(DISCORD_WEBHOOK_MAINNET, {
+  //     content: OPERATION_HANDLER_MAP[contractType](operation)
+  //   })
+  // } else {
+  //   await discordAxios.post(DISCORD_WEBHOOK_TESTNET, {
+  //     content: OPERATION_HANDLER_MAP[contractType](operation)
+  //   })
+  // }
 
   // If we have a `makeOven` call, we need to add a watcher for the new oven
   if (contractType === CONTRACT_TYPES.OvenFactory && operation.entrypoint === 'makeOven'){
