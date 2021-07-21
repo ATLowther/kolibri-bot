@@ -100,6 +100,8 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
+    //makeOven call
+    const firstOp = _(operations).orderBy('timestamp', 'asc').first()
 
     // If this is our first run, just update with the operations and move on
     if (state === null){
@@ -111,6 +113,8 @@ async function watchContract(network, contractAddress, type, timeout, state) {
       for (const operation of operations) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
         if (operation.entrypoint === 'makeOven' && type === CONTRACT_TYPES.Oven) { continue }
+        // Ignore calls to default entrypoint if it is not made by the originator of the oven (likely baker sending rewards)
+        if (operation.entrypoint === 'default' && firstOp.source !== operation.source) { continue }
 
         await processNewOperation(operation, type)
       }
