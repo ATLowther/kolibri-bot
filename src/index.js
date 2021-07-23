@@ -103,7 +103,9 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
     // If this is our first run, just update with the operations and move on
     if (state === null){
-      state = {}
+      //makeOven call
+      const { source: ovenOwner } = _(operations).orderBy('timestamp', 'asc').first();
+      state = { ovenOwner };
     } else {
       // Do notification things here
       logger.info("New operations found!", {network, contractAddress, operations: operations.length})
@@ -112,11 +114,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
         if (operation.entrypoint === 'makeOven' && type === CONTRACT_TYPES.Oven) { continue }
         // Ignore calls to default entrypoint if it is not made by the originator of the oven (likely baker sending rewards)
-        if (operation.entrypoint === "default") {
-          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`);
-          const [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
-          if(ovenOwner !== operation.source) { continue; }
-        }
+        if (operation.entrypoint === "default" && state.ovenOwner !== operation.source) { continue; }
 
         await processNewOperation(operation, type)
       }
