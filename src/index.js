@@ -1,11 +1,11 @@
-const _ = require('lodash');
-const winston = require('winston');
-const { CONTRACTS, Network, StableCoinClient } = require('@hover-labs/kolibri-js');
+const _ = require('lodash')
+const winston = require('winston')
+const { CONTRACTS, Network, StableCoinClient } = require('@hover-labs/kolibri-js')
 
-const formatters = require("./formatters");
-const web = require("./web");
+const formatters = require("./formatters")
+const web = require("./web")
 
-const Sentry = require("@sentry/node");
+const Sentry = require("@sentry/node")
 Sentry.init({
   dsn: "https://1f54507f83d846f5a56402a97337b8c8@o68511.ingest.sentry.io/5643672",
 })
@@ -33,7 +33,7 @@ const logger = winston.createLogger({
       )
     })
   ],
-});
+})
 
 const stableCoinClientTestnet = new StableCoinClient(
     'https://rpctest.tzbeta.net',
@@ -69,7 +69,7 @@ watchContract(Network.Mainnet, CONTRACTS.MAIN.OVEN_FACTORY, CONTRACT_TYPES.OvenF
       const ovens = await stableCoinClientMainnet.getAllOvens()
       for (const {ovenAddress} of ovens) {
         // Sleep for 250ms to prevent thundering herd issues
-        await new Promise(resolve => setTimeout(resolve, 250));
+        await new Promise(resolve => setTimeout(resolve, 250))
 
         await watchContract(Network.Mainnet, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
       }
@@ -82,7 +82,7 @@ watchContract(Network.Florence, CONTRACTS.TEST.OVEN_FACTORY, CONTRACT_TYPES.Oven
 
       for (const {ovenAddress} of ovens) {
         // Sleep for 250ms to prevent thundering herd issues
-        await new Promise(resolve => setTimeout(resolve, 250));
+        await new Promise(resolve => setTimeout(resolve, 250))
         await watchContract(Network.Florence, ovenAddress, CONTRACT_TYPES.Oven, WATCH_TIMEOUT, null)
       }
     })
@@ -101,19 +101,20 @@ async function watchContract(network, contractAddress, type, timeout, state) {
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
 
-    //Find and assign ovenOwner to contracts via state on first pass.
+    // Find and assign ovenOwner to contracts via state on first pass.
     if (state === null){
-      //We do not want to assign an ovenOwner for the Oven Factory
-      if(!(type === CONTRACT_TYPES.OvenFactory)) {
-        let ovenOwner;
-        const makeOven = operations.find(o => o.entrypoint === 'makeOven');        
-        //If we did not receive the makeOven call in our set of operations then make an explicit call to the store of that contract for ovenOwner
-        if(!makeOven) {
-          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`); d          
-          [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
+      // We do not want to assign an ovenOwner for the Oven Factory
+      if (type !== CONTRACT_TYPES.OvenFactory) {
+        let ovenOwner
+        const makeOvenOperation = operations.find(o => o.entrypoint === 'makeOven')
+        // If we did not receive the makeOven call in our set of operations
+        // then make an explicit call to the store of that contract for ovenOwner
+        if (makeOvenOperation !== undefined) {
+          ovenOwner = makeOvenOperation.source
         } else {
-          ({ source: ovenOwner } = makeOven);
-        }        
+          const storageResponse = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`)
+          ovenOwner = storageResponse.data[0].children.filter(o => o.name === "owner").value
+        }
         state = { ovenOwner };
       } else {
         state = {}
