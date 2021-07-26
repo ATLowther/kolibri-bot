@@ -12,7 +12,7 @@ Sentry.init({
 
 require('dotenv').config()
 
-const WATCH_TIMEOUT = 15 * 60 * 1000 // Check contracts every 10 mins
+const WATCH_TIMEOUT = 15 * 60 * 1000 // Check contracts every 15 mins
 const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET
 const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET
 
@@ -100,12 +100,24 @@ async function watchContract(network, contractAddress, type, timeout, state) {
 
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
-    //makeOven call
-    const firstOp = _(operations).orderBy('timestamp', 'asc').first()
 
-    // If this is our first run, just update with the operations and move on
+    //Find and assign ovenOwner to contracts via state on first pass.
     if (state === null){
-      state = {}
+      //We do not want to assign an ovenOwner for the Oven Factory
+      if(!(type === CONTRACT_TYPES.OvenFactory)) {
+        let ovenOwner;
+        const makeOven = operations.find(o => o.entrypoint === 'makeOven');        
+        //If we did not receive the makeOven call in our set of operations then make an explicit call to the store of that contract for ovenOwner
+        if(!makeOven) {
+          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`); d          
+          [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
+        } else {
+          ({ source: ovenOwner } = makeOven);
+        }        
+        state = { ovenOwner };
+      } else {
+        state = {}
+      }
     } else {
       // Do notification things here
       logger.info("New operations found!", {network, contractAddress, operations: operations.length})
@@ -114,7 +126,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
         // Skip duplicate origination notification on Oven contracts (should never actually happen)
         if (operation.entrypoint === 'makeOven' && type === CONTRACT_TYPES.Oven) { continue }
         // Ignore calls to default entrypoint if it is not made by the originator of the oven (likely baker sending rewards)
-        if (operation.entrypoint === 'default' && firstOp.source !== operation.source) { continue }
+        if (operation.entrypoint === "default" && state.ovenOwner !== operation.source) { continue; }
 
         await processNewOperation(operation, type)
       }
