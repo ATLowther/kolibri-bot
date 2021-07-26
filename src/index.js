@@ -113,8 +113,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
           [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
         } else {
           ({ source: ovenOwner } = makeOven);
-        }
-        console.log(ovenOwner)
+        }        
         state = { ovenOwner };
       } else {
         state = {}
