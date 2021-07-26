@@ -101,11 +101,25 @@ async function watchContract(network, contractAddress, type, timeout, state) {
   if (operations.length !== 0) {
     const latestOp = _(operations).orderBy('timestamp', 'desc').first()
 
-    // If this is our first run, just update with the operations and move on
+    //Find and assign ovenOwner to contracts via state on first pass.
     if (state === null){
-      //makeOven call
-      const { source: ovenOwner } = _(operations).orderBy('timestamp', 'asc').first();
-      state = { ovenOwner };
+      //We do not want to assign an ovenOwner for the Oven Factory
+      if(!(type === CONTRACT_TYPES.OvenFactory)) {
+        let ovenOwner;
+        const makeOven = operations.find(o => o.entrypoint === 'makeOven');        
+        //If we did not receive the makeOven call in our set of operations then make an explicit call to the store of that contract for ovenOwner
+        if(!makeOven) {
+          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`);
+          console.log(response.data[0])
+          [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
+        } else {
+          ({ source: ovenOwner } = makeOven);
+        }
+        console.log(ovenOwner)
+        state = { ovenOwner };
+      } else {
+        state = {}
+      }
     } else {
       // Do notification things here
       logger.info("New operations found!", {network, contractAddress, operations: operations.length})
