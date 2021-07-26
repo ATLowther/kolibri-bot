@@ -109,8 +109,7 @@ async function watchContract(network, contractAddress, type, timeout, state) {
         const makeOven = operations.find(o => o.entrypoint === 'makeOven');        
         //If we did not receive the makeOven call in our set of operations then make an explicit call to the store of that contract for ovenOwner
         if(!makeOven) {
-          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`);
-          console.log(response.data[0])
+          const response = await betterCallDevAxios.get(`https://api.better-call.dev/v1/contract/${network}/${contractAddress}/storage`); d          
           [{ value: ovenOwner }] = response.data[0].children.filter((o) => o.name == "owner");
         } else {
           ({ source: ovenOwner } = makeOven);
