@@ -12,7 +12,7 @@ Sentry.init({
 
 require('dotenv').config()
 
-const WATCH_TIMEOUT = 15 * 60 * 1000 // Check contracts every 10 mins
+const WATCH_TIMEOUT = 15 * 60 * 1000 // Check contracts every 15 mins
 const DISCORD_WEBHOOK_TESTNET = process.env.DISCORD_WEBHOOK_TESTNET
 const DISCORD_WEBHOOK_MAINNET = process.env.DISCORD_WEBHOOK_MAINNET
 
